@@ -1,0 +1,24 @@
+<!-- login.html -->
+{% extends 'base.html' %}
+
+{% block content %}
+<center>
+    <h1>Welcome to Password Manager</h1>
+    <h2>Login</h2>
+
+    <div class="form-container">
+        <form method="POST">
+            <label for="username">Username</label>
+            <input type="text" name="username" required class="input-field">
+            <br>
+            <br>
+            <label for="password">Password</label>
+            <input type="password" name="password" required class="input-field">
+            <button type="submit" class="submit-button">Login</button>
+        </form>
+    </div>
+</center>
+<center>
+    <p>Not registered yet? <a href="{{ url_for('register') }}">Register now</a></p>
+</center>
+{% endblock %}

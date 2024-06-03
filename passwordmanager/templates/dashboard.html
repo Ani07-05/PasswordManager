@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="dashboard-header">
+    <h2>Dashboard</h2>
+</div>
+
+<div class="form-container">
+    <form class="add-form" method="POST" action="{{ url_for('add_password') }}">
+        <h2>Add New Password</h2>
+        <input type="text" name="site_name" placeholder="Website Name" required class="input-field">
+        <input type="text" name="site_url" placeholder="Website URL" required class="input-field">
+        <input type="password" name="site_password" placeholder="Password" required class="input-field">
+        <button type="submit">Add</button>
+    </form>
+</div>
+
+<table class="password-table">
+    <thead>
+        <tr>
+            <th>Website Name</th>
+            <th>Website URL</th>
+            <th>Password</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for password in passwords %}
+        <tr>
+            <td>{{ password['site_name'] }}</td>
+            <td>{{ password['site_url'] }}</td>
+            <td>{{ password['site_password'] }}</td>
+            <td>
+                <form method="POST" action="{{ url_for('update_password', id=password['id']) }}">
+                    <input type="text" name="site_name" value="{{ password['site_name'] }}" required>
+                    <input type="text" name="site_url" value="{{ password['site_url'] }}" required>
+                    <input type="password" name="site_password" value="{{ password['site_password'] }}" required>
+                    <button type="submit">Update</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
