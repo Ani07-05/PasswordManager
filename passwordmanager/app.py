@@ -1,14 +1,21 @@
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 from werkzeug.security import generate_password_hash, check_password_hash
 import sqlite3
+import logging
 
 app = Flask(__name__)
 app.secret_key = 'supersecretkey'
 
+logging.basicConfig(level=logging.DEBUG)
+
 def get_db_connection():
-    conn = sqlite3.connect('database.db')
-    conn.row_factory = sqlite3.Row  # This will allow us to access the columns by their names
-    return conn
+    try:
+        conn = sqlite3.connect('database.db')
+        conn.row_factory = sqlite3.Row  # This will allow us to access the columns by their names
+        return conn
+    except sqlite3.Error as e:
+        app.logger.error(f"Database connection error: {e}")
+        return None
 
 @app.route('/')
 def index():
@@ -22,6 +29,10 @@ def register():
         hashed_password = generate_password_hash(password, method='pbkdf2:sha256', salt_length=8)
 
         conn = get_db_connection()
+        if conn is None:
+            flash('Database connection failed')
+            return redirect(url_for('register'))
+
         user = conn.execute('SELECT * FROM users WHERE username = ?', (username,)).fetchone()
         
         if user:
@@ -44,6 +55,10 @@ def login():
         password = request.form['password']
 
         conn = get_db_connection()
+        if conn is None:
+            flash('Database connection failed')
+            return redirect(url_for('login'))
+
         user = conn.execute('SELECT * FROM users WHERE username = ?', (username,)).fetchone()
         conn.close()
 
@@ -62,6 +77,10 @@ def dashboard():
 
     user_id = session['user_id']
     conn = get_db_connection()
+    if conn is None:
+        flash('Database connection failed')
+        return redirect(url_for('login'))
+    
     passwords = conn.execute('SELECT * FROM passwords WHERE user_id = ?', (user_id,)).fetchall()
     conn.close()
     return render_template('dashboard.html', passwords=passwords)
@@ -76,6 +95,10 @@ def add_password():
     site_password = request.form['site_password']
 
     conn = get_db_connection()
+    if conn is None:
+        flash('Database connection failed')
+        return redirect(url_for('dashboard'))
+
     conn.execute('INSERT INTO passwords (user_id, site_name, site_url, site_password) VALUES (?, ?, ?, ?)',
                  (session['user_id'], site_name, site_url, site_password))
     conn.commit()
@@ -93,6 +116,10 @@ def update_password(id):
     site_password = request.form['site_password']
 
     conn = get_db_connection()
+    if conn is None:
+        flash('Database connection failed')
+        return redirect(url_for('dashboard'))
+
     conn.execute('UPDATE passwords SET site_name = ?, site_url = ?, site_password = ? WHERE id = ? AND user_id = ?',
                  (site_name, site_url, site_password, id, session['user_id']))
     conn.commit()
