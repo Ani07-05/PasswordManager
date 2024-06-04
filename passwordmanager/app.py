@@ -7,12 +7,12 @@ app.secret_key = 'supersecretkey'
 
 def get_db_connection():
     conn = sqlite3.connect('database.db')
-    conn.row_factory = sqlite3.Row # This will allow us to access the columns by their names
+    conn.row_factory = sqlite3.Row  # This will allow us to access the columns by their names
     return conn
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return redirect(url_for('register'))
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
